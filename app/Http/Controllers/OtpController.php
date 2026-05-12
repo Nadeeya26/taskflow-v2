@@ -9,22 +9,29 @@ class OtpController extends Controller
 {
     public function show()
     {
+        if (Auth::user()->is_verified) {
+            return redirect()->route('dashboard');
+        }
+
         return view('auth.otp');
     }
 
     public function verify(Request $request)
     {
         $request->validate([
-            'otp' => 'required|string|size:6',
+            'otp' => ['required', 'digits:6'],
         ]);
 
         $user = Auth::user();
+        $enteredOtp = trim($request->otp);
+        $storedOtp = (string) $user->otp;
 
-        if ($user->otp === $request->otp) {
+        if ($storedOtp !== '' && hash_equals($storedOtp, $enteredOtp)) {
             $user->update([
                 'is_verified' => true,
                 'otp' => null,
             ]);
+
             return redirect()->route('dashboard')
                 ->with('success', 'Account verified successfully!');
         }
