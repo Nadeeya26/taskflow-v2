@@ -14,6 +14,8 @@ class UserSeeder extends Seeder
             'email' => 'admin@taskflow.com',
             'password' => bcrypt('password'),
             'role' => 'admin',
+            'otp' => null,
+            'is_verified' => true,
         ]);
 
         $john = User::create([

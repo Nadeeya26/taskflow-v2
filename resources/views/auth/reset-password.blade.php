@@ -19,6 +19,7 @@
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
                 <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+                <p class="tf-muted mt-2 text-xs">Use at least 8 characters and add one symbol, like !, @, or #.</p>
             </div>
 
             <div class="mt-4">
