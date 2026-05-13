@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class OtpController extends Controller
@@ -18,12 +19,16 @@ class OtpController extends Controller
 
     public function verify(Request $request)
     {
+        $request->merge([
+            'otp' => preg_replace('/\D/', '', (string) $request->otp),
+        ]);
+
         $request->validate([
             'otp' => ['required', 'digits:6'],
         ]);
 
-        $user = Auth::user();
-        $enteredOtp = trim($request->otp);
+        $user = Auth::user()->fresh();
+        $enteredOtp = (string) $request->otp;
         $storedOtp = (string) $user->otp;
 
         if ($storedOtp !== '' && hash_equals($storedOtp, $enteredOtp)) {
@@ -36,14 +41,19 @@ class OtpController extends Controller
                 ->with('success', 'Account verified successfully!');
         }
 
-        return back()->withErrors(['otp' => 'Invalid OTP. Please try again.']);
+        Log::warning('Invalid OTP attempt', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'has_saved_otp' => $storedOtp !== '',
+        ]);
+
+        return back()->withErrors(['otp' => 'Invalid OTP. Please request a new code and try again.']);
     }
 
     public function resend()
     {
-        $user = Auth::user();
+        $user = Auth::user()->fresh();
         $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        $user->update(['otp' => $otp]);
 
         Mail::send([], [], function($message) use ($user, $otp) {
             $message->to($user->email)
@@ -69,6 +79,8 @@ class OtpController extends Controller
                         </div>
                     ");
         });
+
+        $user->update(['otp' => $otp]);
 
         return back()->with('success', 'OTP sent to ' . $user->email . '! Please check your inbox.');
     }

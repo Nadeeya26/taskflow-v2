@@ -38,6 +38,21 @@ class OtpVerificationTest extends TestCase
         $this->assertNull($user->fresh()->otp);
     }
 
+    public function test_user_can_verify_with_pasted_otp_containing_spaces(): void
+    {
+        $user = User::factory()->create([
+            'otp' => '123456',
+            'is_verified' => false,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('otp.verify'), [
+            'otp' => '123 456',
+        ]);
+
+        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertTrue($user->fresh()->is_verified);
+    }
+
     public function test_user_can_resend_otp(): void
     {
         $user = User::factory()->create([
