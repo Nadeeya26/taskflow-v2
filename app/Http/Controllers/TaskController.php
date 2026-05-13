@@ -17,6 +17,44 @@ class TaskController extends Controller
         return view('dashboard', compact('tasks', 'total', 'completed', 'pending'));
     }
 
+    public function analytics()
+    {
+        $tasks = Task::where('user_id', Auth::id())->get();
+        $total = $tasks->count();
+        $completed = $tasks->where('status', 'completed')->count();
+        $pending = $total - $completed;
+        $completionRate = $total > 0 ? round(($completed / $total) * 100) : 0;
+        $high = $tasks->where('priority', 'high')->count();
+        $medium = $tasks->where('priority', 'medium')->count();
+        $low = $tasks->where('priority', 'low')->count();
+
+        return view('tasks.analytics', compact(
+            'tasks',
+            'total',
+            'completed',
+            'pending',
+            'completionRate',
+            'high',
+            'medium',
+            'low'
+        ));
+    }
+
+    public function calendar()
+    {
+        $tasks = Task::where('user_id', Auth::id())
+            ->whereNotNull('due_date')
+            ->orderBy('due_date')
+            ->get();
+
+        return view('tasks.calendar', compact('tasks'));
+    }
+
+    public function settings()
+    {
+        return view('tasks.settings');
+    }
+
     public function create()
     {
         return view('tasks.create');

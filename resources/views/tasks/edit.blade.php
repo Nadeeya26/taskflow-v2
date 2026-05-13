@@ -1,69 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  @include('partials.tf-head')
   <title>Edit Task - TaskFlow</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: { colors: { primary: '#1e3a5f', secondary: '#2E5C8E' } } }
-    }
-  </script>
-  <style type="text/tailwindcss">
-    @layer components {
-      .input-field { @apply w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary; }
-      .btn-primary { @apply bg-primary text-white px-8 py-3 rounded-lg hover:bg-secondary transition font-semibold; }
-    }
-  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white rounded-2xl shadow-lg p-10 w-full max-w-lg">
-    <h2 class="text-2xl font-bold text-primary mb-2">Edit Task</h2>
-    <p class="text-gray-500 mb-8">Update your task details</p>
+<body class="font-sans">
+<div class="tf-shell">
+  @include('partials.tf-sidebar')
 
-    @if($errors->any())
-      <div class="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-4">
-        @foreach($errors->all() as $error)
-          <p>{{ $error }}</p>
-        @endforeach
-      </div>
-    @endif
+  <main class="tf-main">
+    <div class="mb-6">
+      <h1 class="text-2xl font-black">Edit Task</h1>
+      <p class="tf-muted text-sm mt-1">Update the task without changing the workflow.</p>
+    </div>
 
-    <form method="POST" action="{{ route('tasks.update', $task) }}">
-      @csrf
-      @method('PUT')
-      <div class="mb-4">
-        <label class="block text-gray-700 font-semibold mb-2">Task Title *</label>
-        <input type="text" name="title" class="input-field" value="{{ $task->title }}" required>
-      </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 font-semibold mb-2">Description</label>
-        <textarea name="description" class="input-field" rows="3">{{ $task->description }}</textarea>
-      </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 font-semibold mb-2">Priority</label>
-        <select name="priority" class="input-field">
-          <option value="low" {{ $task->priority === 'low' ? 'selected' : '' }}>🟢 Low</option>
-          <option value="medium" {{ $task->priority === 'medium' ? 'selected' : '' }}>🟡 Medium</option>
-          <option value="high" {{ $task->priority === 'high' ? 'selected' : '' }}>🔴 High</option>
-        </select>
-      </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 font-semibold mb-2">Status</label>
-        <select name="status" class="input-field">
-          <option value="pending" {{ $task->status === 'pending' ? 'selected' : '' }}>⏳ Pending</option>
-          <option value="completed" {{ $task->status === 'completed' ? 'selected' : '' }}>✅ Completed</option>
-        </select>
-      </div>
-      <div class="mb-6">
-        <label class="block text-gray-700 font-semibold mb-2">Due Date</label>
-        <input type="date" name="due_date" class="input-field" value="{{ $task->due_date }}">
-      </div>
-      <div class="flex gap-4">
-        <button type="submit" class="btn-primary">Save Changes</button>
-        <a href="{{ route('dashboard') }}" class="px-8 py-3 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition font-semibold">Cancel</a>
-      </div>
-    </form>
-  </div>
+    <section class="tf-card max-w-2xl p-6">
+      @if($errors->any())
+        <div class="tf-card-soft mb-5 p-4 text-red-200">
+          @foreach($errors->all() as $error)
+            <p>{{ $error }}</p>
+          @endforeach
+        </div>
+      @endif
+
+      <form method="POST" action="{{ route('tasks.update', $task) }}" class="space-y-5">
+        @csrf
+        @method('PUT')
+
+        <div>
+          <label class="tf-label" for="title">Task Title</label>
+          <input id="title" type="text" name="title" class="tf-input mt-2" value="{{ old('title', $task->title) }}" required>
+        </div>
+
+        <div>
+          <label class="tf-label" for="description">Description</label>
+          <textarea id="description" name="description" class="tf-textarea mt-2" rows="4">{{ old('description', $task->description) }}</textarea>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-3">
+          <div>
+            <label class="tf-label" for="priority">Priority</label>
+            <select id="priority" name="priority" class="tf-select mt-2">
+              <option value="low" {{ $task->priority === 'low' ? 'selected' : '' }}>Low</option>
+              <option value="medium" {{ $task->priority === 'medium' ? 'selected' : '' }}>Medium</option>
+              <option value="high" {{ $task->priority === 'high' ? 'selected' : '' }}>High</option>
+            </select>
+          </div>
+          <div>
+            <label class="tf-label" for="status">Status</label>
+            <select id="status" name="status" class="tf-select mt-2">
+              <option value="pending" {{ $task->status === 'pending' ? 'selected' : '' }}>Pending</option>
+              <option value="completed" {{ $task->status === 'completed' ? 'selected' : '' }}>Completed</option>
+            </select>
+          </div>
+          <div>
+            <label class="tf-label" for="due_date">Due Date</label>
+            <input id="due_date" type="date" name="due_date" class="tf-input mt-2" value="{{ old('due_date', $task->due_date) }}">
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button type="submit" class="tf-button primary">Save Changes</button>
+          <a href="{{ route('dashboard') }}" class="tf-button">Cancel</a>
+        </div>
+      </form>
+    </section>
+  </main>
+</div>
 </body>
 </html>

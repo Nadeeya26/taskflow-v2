@@ -18,6 +18,9 @@ Route::middleware(['auth'])->group(function () {
 // Protected user routes
 Route::middleware(['auth', 'otp.verified'])->group(function () {
     Route::get('/dashboard', [TaskController::class, 'index'])->name('dashboard');
+    Route::get('/analytics', [TaskController::class, 'analytics'])->name('tasks.analytics');
+    Route::get('/calendar', [TaskController::class, 'calendar'])->name('tasks.calendar');
+    Route::get('/settings', [TaskController::class, 'settings'])->name('tasks.settings');
     Route::get('/tasks/create', [TaskController::class, 'create'])->name('tasks.create');
     Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
     Route::get('/tasks/{task}/edit', [TaskController::class, 'edit'])->name('tasks.edit');

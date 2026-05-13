@@ -1,107 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  @include('partials.tf-head')
   <title>Admin Panel - TaskFlow</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: { extend: { colors: { primary: '#1e3a5f', secondary: '#2E5C8E' } } }
-    }
-  </script>
-  <style type="text/tailwindcss">
-    @layer components {
-      .sidebar-link { @apply flex items-center gap-3 px-4 py-3 rounded-lg text-blue-100 hover:bg-secondary transition font-medium; }
-      .sidebar-active { @apply bg-secondary text-white flex items-center gap-3 px-4 py-3 rounded-lg font-medium; }
-    }
-  </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex">
+<body class="font-sans">
+<div class="tf-shell">
+  @include('partials.tf-sidebar')
 
-  <!-- SIDEBAR -->
-  <aside class="w-64 bg-primary min-h-screen flex flex-col fixed left-0 top-0">
-    <div class="px-6 py-6 border-b border-blue-800">
-      <h1 class="text-white text-2xl font-bold">TaskFlow</h1>
-      <p class="text-blue-300 text-sm mt-1">Admin: {{ Auth::user()->name }}</p>
-    </div>
-    <nav class="flex-1 px-4 py-6 space-y-2">
-      <a href="{{ route('dashboard') }}" class="sidebar-link">📋 Dashboard</a>
-      <a href="{{ route('admin.index') }}" class="sidebar-active">🛡️ Admin Panel</a>
-    </nav>
-    <div class="px-4 py-6 border-t border-blue-800">
-      <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="sidebar-link w-full text-left">🚪 Logout</button>
-      </form>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="ml-64 flex-1 p-8">
-    <div class="mb-8">
-      <h2 class="text-3xl font-bold text-primary">Admin Panel</h2>
-      <p class="text-gray-500 mt-1">Manage all users and tasks</p>
+  <main class="tf-main">
+    <div class="mb-6">
+      <h1 class="text-2xl font-black">Admin Panel</h1>
+      <p class="tf-muted text-sm mt-1">Manage users and tasks from one simple screen.</p>
     </div>
 
     @if(session('success'))
-      <div class="bg-green-100 text-green-700 px-4 py-3 rounded-lg mb-6">{{ session('success') }}</div>
+      <div class="tf-card-soft mb-5 p-4 text-green-200">{{ session('success') }}</div>
     @endif
 
-    <!-- STATS -->
-    <div class="grid grid-cols-3 gap-6 mb-10">
-      <div class="bg-white rounded-xl shadow p-6 text-center">
-        <p class="text-4xl font-bold text-primary">{{ $total_users }}</p>
-        <p class="text-gray-500 mt-2 font-medium">Total Users</p>
-      </div>
-      <div class="bg-white rounded-xl shadow p-6 text-center">
-        <p class="text-4xl font-bold text-secondary">{{ $total_tasks }}</p>
-        <p class="text-gray-500 mt-2 font-medium">Total Tasks</p>
-      </div>
-      <div class="bg-white rounded-xl shadow p-6 text-center">
-        <p class="text-4xl font-bold text-green-500">{{ $completion_rate }}%</p>
-        <p class="text-gray-500 mt-2 font-medium">Completion Rate</p>
-      </div>
+    <div class="grid gap-5 md:grid-cols-3 mb-6">
+      <div class="tf-card tf-stat"><p class="tf-muted text-xs font-black">TOTAL USERS</p><p class="tf-stat-value mt-6">{{ $total_users }}</p></div>
+      <div class="tf-card tf-stat"><p class="tf-muted text-xs font-black">TOTAL TASKS</p><p class="tf-stat-value mt-6">{{ $total_tasks }}</p></div>
+      <div class="tf-card tf-stat"><p class="tf-muted text-xs font-black">COMPLETION RATE</p><p class="tf-stat-value mt-6">{{ $completion_rate }}%</p></div>
     </div>
 
-    <!-- USERS TABLE -->
-    <div class="bg-white rounded-xl shadow overflow-hidden mb-10">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-bold text-primary">All Users</h3>
+    <section class="tf-card overflow-hidden mb-6">
+      <div class="border-b border-slate-700/40 px-5 py-4">
+        <h2 class="font-black">All Users</h2>
       </div>
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+        <table class="tf-table">
+          <thead>
             <tr>
-              <th class="px-6 py-3 text-left">Name</th>
-              <th class="px-6 py-3 text-left">Email</th>
-              <th class="px-6 py-3 text-left">Role</th>
-              <th class="px-6 py-3 text-left">Tasks</th>
-              <th class="px-6 py-3 text-left">Joined</th>
-              <th class="px-6 py-3 text-left">Action</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Tasks</th>
+              <th>Joined</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody>
             @foreach($users as $user)
-              <tr class="hover:bg-gray-50 transition">
-                <td class="px-6 py-4 font-medium text-gray-800">{{ $user->name }}</td>
-                <td class="px-6 py-4 text-gray-500">{{ $user->email }}</td>
-                <td class="px-6 py-4">
-                  <span class="px-3 py-1 rounded-full text-xs font-bold {{ $user->role === 'admin' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700' }}">
-                    {{ ucfirst($user->role) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-gray-600">{{ $user->tasks_count }}</td>
-                <td class="px-6 py-4 text-gray-400">{{ $user->created_at->format('d M Y') }}</td>
-                <td class="px-6 py-4">
+              <tr>
+                <td class="font-bold">{{ $user->name }}</td>
+                <td class="tf-muted">{{ $user->email }}</td>
+                <td><span class="tf-pill {{ $user->role === 'admin' ? 'high' : 'pending' }}">{{ ucfirst($user->role) }}</span></td>
+                <td>{{ $user->tasks_count }}</td>
+                <td class="tf-muted">{{ $user->created_at->format('d M Y') }}</td>
+                <td>
                   @if($user->role !== 'admin')
                     <form method="POST" action="{{ route('admin.deleteUser', $user) }}" onsubmit="return confirm('Delete this user and all their tasks?')">
                       @csrf
                       @method('DELETE')
-                      <button type="submit" class="bg-red-50 text-red-600 px-3 py-1 rounded-lg text-sm hover:bg-red-100 transition font-medium">🗑️ Delete</button>
+                      <button type="submit" class="tf-button danger">Delete</button>
                     </form>
                   @else
-                    <span class="text-gray-300 text-sm">Protected</span>
+                    <span class="tf-muted text-sm">Protected</span>
                   @endif
                 </td>
               </tr>
@@ -109,45 +64,37 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-    <!-- TASKS TABLE -->
-    <div class="bg-white rounded-xl shadow overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-bold text-primary">All Tasks</h3>
+    <section class="tf-card overflow-hidden">
+      <div class="border-b border-slate-700/40 px-5 py-4">
+        <h2 class="font-black">All Tasks</h2>
       </div>
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+        <table class="tf-table">
+          <thead>
             <tr>
-              <th class="px-6 py-3 text-left">Title</th>
-              <th class="px-6 py-3 text-left">User</th>
-              <th class="px-6 py-3 text-left">Priority</th>
-              <th class="px-6 py-3 text-left">Status</th>
-              <th class="px-6 py-3 text-left">Due Date</th>
-              <th class="px-6 py-3 text-left">Action</th>
+              <th>Title</th>
+              <th>User</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody>
             @foreach($tasks as $task)
-              @php $pc = ['high'=>'bg-red-100 text-red-700','medium'=>'bg-yellow-100 text-yellow-700','low'=>'bg-green-100 text-green-700']; @endphp
-              <tr class="hover:bg-gray-50 transition">
-                <td class="px-6 py-4 font-medium text-gray-800">{{ $task->title }}</td>
-                <td class="px-6 py-4 text-gray-500">{{ $task->user->name }}</td>
-                <td class="px-6 py-4">
-                  <span class="px-3 py-1 rounded-full text-xs font-bold {{ $pc[$task->priority] }}">{{ ucfirst($task->priority) }}</span>
-                </td>
-                <td class="px-6 py-4">
-                  <span class="px-3 py-1 rounded-full text-xs font-bold {{ $task->status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                    {{ ucfirst($task->status) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-gray-400">{{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('d M Y') : 'No date' }}</td>
-                <td class="px-6 py-4">
+              <tr>
+                <td class="font-bold">{{ $task->title }}</td>
+                <td class="tf-muted">{{ $task->user->name }}</td>
+                <td><span class="tf-pill {{ $task->priority }}">{{ ucfirst($task->priority) }}</span></td>
+                <td><span class="tf-pill {{ $task->status === 'completed' ? 'done' : 'pending' }}">{{ ucfirst($task->status) }}</span></td>
+                <td class="tf-muted">{{ $task->due_date ? \Carbon\Carbon::parse($task->due_date)->format('d M Y') : 'No date' }}</td>
+                <td>
                   <form method="POST" action="{{ route('admin.deleteTask', $task) }}" onsubmit="return confirm('Delete this task?')">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="bg-red-50 text-red-600 px-3 py-1 rounded-lg text-sm hover:bg-red-100 transition font-medium">🗑️ Delete</button>
+                    <button type="submit" class="tf-button danger">Delete</button>
                   </form>
                 </td>
               </tr>
@@ -155,7 +102,8 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   </main>
+</div>
 </body>
 </html>
